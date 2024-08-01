@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">OCAC app</string>
+    <string name="title_activity_walkthrough_screen">WalkthroughScreen</string>
+    <string name="title_activity_login_screen">LoginScreenActivity</string>
+    <string name="title_activity_otpscreen">OTPScreen</string>
+    <string name="title_activity_dashboard_screen">DashboardScreen</string>
+    <string name="title_activity_splash_screen">SplashScreen</string>
+</resources>
