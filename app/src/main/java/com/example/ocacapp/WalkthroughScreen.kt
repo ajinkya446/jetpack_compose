@@ -2,6 +2,7 @@
 
 package com.example.ocacapp
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -61,6 +62,12 @@ class WalkthroughScreen : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val context = LocalContext.current
+                    val sharedPref = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
+                    with(sharedPref.edit()) {
+                        putBoolean("walkthrough", true)
+                        apply()
+                    }
                     OnBoardingScreen()
 
                 }
@@ -148,10 +155,10 @@ fun OnBoardingScreen(walkthroughViewModel: WalkthroughViewModel = viewModel()) {
                 repeat(data?.data?.size ?: 2) {
                     CustomIndicator(isSelected = pagerState.currentPage == it)
                 }
-                if (pagerState.currentPage == (data?.data?.size ?: 2)) {
+                if (pagerState.currentPage == 2) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
-                if (pagerState.currentPage == (data?.data?.size ?: 2)) {
+                if (pagerState.currentPage == 2) {
                     val context = LocalContext.current
                     Box(
                         modifier = Modifier

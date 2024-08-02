@@ -1,5 +1,6 @@
 package com.example.ocacapp
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -26,12 +27,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,21 +53,28 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ocacapp.ui.theme.OCACAppTheme
+import kotlinx.coroutines.launch
 
 class LoginScreenActivity : ComponentActivity() {
+    @SuppressLint("RememberReturnType")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val snackbarHostState = remember { SnackbarHostState() }
+            val coroutineScope = rememberCoroutineScope()
             var textState by remember { mutableStateOf("") }
+
             OCACAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    var isValid by remember { mutableStateOf(false) }
+                    var errorMessage by remember { mutableStateOf("") }
                     val context = LocalContext.current
-                    Scaffold { innerPadding ->
+                    Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -143,6 +154,16 @@ class LoginScreenActivity : ComponentActivity() {
                                     ),
                                     onValueChange = {
                                         textState = it
+                                        validateAadhaarNumber(it)?.let { error ->
+                                            isValid = false
+                                            errorMessage = error
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar(errorMessage)
+                                            }
+                                        } ?: run {
+                                            isValid = true
+                                            errorMessage = ""
+                                        }
                                     },
                                     placeholder = {
                                         Text(
@@ -161,12 +182,14 @@ class LoginScreenActivity : ComponentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .clickable {
-                                            context.startActivity(
-                                                Intent(
-                                                    context,
-                                                    OTPScreen::class.java
+                                            if (isValid) {
+                                                context.startActivity(
+                                                    Intent(
+                                                        context,
+                                                        OTPScreen::class.java
+                                                    )
                                                 )
-                                            )
+                                            }
                                         }
                                         .fillMaxWidth()
                                         .height(58.dp)
@@ -259,4 +282,14 @@ class LoginScreenActivity : ComponentActivity() {
             }
         }
     }
+
+    fun validateAadhaarNumber(aadhaar: String): String? {
+        val aadhaarRegex = Regex("^[0-9]{12}$")
+        return if (!aadhaarRegex.matches(aadhaar)) {
+            "Invalid Aadhaar number. It must be exactly 12 digits."
+        } else {
+            null
+        }
+    }
 }
+

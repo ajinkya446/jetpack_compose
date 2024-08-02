@@ -1,5 +1,6 @@
 package com.example.ocacapp
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -31,8 +32,10 @@ class SplashScreen : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                ) {
-                    SplashScreenUI()
+                ) {val context = LocalContext.current
+                    val sharedPref = context.getSharedPreferences("my_prefs",Context.MODE_PRIVATE)
+                    val isBoarded = sharedPref.getBoolean("walkthrough", false)
+                    SplashScreenUI(isBoarded)
                 }
             }
         }
@@ -40,16 +43,25 @@ class SplashScreen : ComponentActivity() {
 }
 
 @Composable
-fun SplashScreenUI() {
+fun SplashScreenUI(isBoarded: Boolean) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         delay(3000) // 3 seconds delay
-        context.startActivity(
-            Intent(
-                context,
-                MainActivity::class.java
+        if (!isBoarded) {
+            context.startActivity(
+                Intent(
+                    context,
+                    MainActivity::class.java
+                )
             )
-        )
+        } else {
+            context.startActivity(
+                Intent(
+                    context,
+                    LoginScreenActivity::class.java
+                )
+            )
+        }
     }
     Column(
         verticalArrangement = Arrangement.Center,
