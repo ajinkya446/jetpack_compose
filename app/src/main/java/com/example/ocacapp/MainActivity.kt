@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -26,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,7 +45,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.ocacapp.Model.LanguageData
+import com.example.ocacapp.ViewModels.LanguageViewModel
 import com.example.ocacapp.ui.theme.OCACAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -101,7 +106,7 @@ class MainActivity : ComponentActivity() {
                                 .padding(paddingValues = innerPadding),
                             contentAlignment = Alignment.Center
                         ) {
-                            ChangeLanguageUI(Modifier)
+                            ChangeLanguageUI()
                         }
                     }
                 }
@@ -111,42 +116,55 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ChangeLanguageUI(modifier: Modifier) {
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Choose Language",
-            style = TextStyle(
-                fontSize = 18.sp,
-                fontFamily = FontFamily(Font(R.font.lato_regular)),
-                fontWeight = FontWeight.Bold
+fun ChangeLanguageUI(viewModels: LanguageViewModel = viewModel()) {
+    val data by viewModels.data
+    println("Data = ${(data?.data?.size ?: "No Size")}")
+    if (data?.data?.isNotEmpty() == true) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Choose Language",
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontFamily = FontFamily(Font(R.font.lato_regular)),
+                    fontWeight = FontWeight.Bold
+                )
             )
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = "Please select a language that best suits your need",
-            style = TextStyle(
-                fontSize = 12.sp,
-                fontFamily = FontFamily(Font(R.font.lato_regular)),
-                fontWeight = FontWeight.Medium,
-                color = Color(0xff3F3F3F)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Please select a language that best suits your need",
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.lato_regular)),
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xff3F3F3F)
+                )
             )
-        )
-        Spacer(modifier = Modifier.height(48.dp))
-        KindRadioGroupUsage()
+            Spacer(modifier = Modifier.height(48.dp))
+            KindRadioGroupUsage(data?.data!!)
+        }
+    } else {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text("Loading")
+        }
     }
 }
 
 @Composable
-fun KindRadioGroupUsage() {
-    val kinds = listOf("English", "Hindi", "Orissa")
-    val (selected, setSelected) = remember { mutableStateOf(kinds[0]) }
+fun KindRadioGroupUsage(listData: List<LanguageData>) {
+//    val kinds = listOf("English", "Hindi", "Orissa")
+    val (selected, setSelected) = remember { mutableStateOf(listData[0].value) }
 
     KindRadioGroup(
-        mItems = kinds,
+        mItems = listData,
         selected, setSelected
     )
 
@@ -155,7 +173,7 @@ fun KindRadioGroupUsage() {
 
 @Composable
 fun KindRadioGroup(
-    mItems: List<String>,
+    mItems: List<LanguageData>,
     selected: String,
     setSelected: (selected: String) -> Unit
 ) {
@@ -171,10 +189,10 @@ fun KindRadioGroup(
                         .selectable(
                             // this method is called when
                             // radio button is selected.
-                            selected = (item == selected),
+                            selected = (item.value == selected),
                             // below method is called on
                             // clicking of radio button.
-                            onClick = { setSelected(item) }
+                            onClick = { setSelected(item.value) }
                         )
                         .padding(bottom = 12.dp)
                         .border(
@@ -192,9 +210,9 @@ fun KindRadioGroup(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = selected == item,
+                            selected = selected == item.value,
                             onClick = {
-                                setSelected(item)
+                                setSelected(item.value)
                             },
                             enabled = true,
                             colors = RadioButtonDefaults.colors(
@@ -203,7 +221,7 @@ fun KindRadioGroup(
                         )
 
                         Text(
-                            text = item,
+                            text = item.value,
                             style = TextStyle(fontFamily = FontFamily(Font(R.font.lato_regular))),
                         )
 

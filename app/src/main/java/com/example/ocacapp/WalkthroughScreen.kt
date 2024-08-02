@@ -106,10 +106,10 @@ fun OnBoardingScreen(walkthroughViewModel: WalkthroughViewModel = viewModel()) {
                         contentScale = ContentScale.Crop,
                         error = painterResource(R.drawable.plant),
                         modifier = Modifier
-                            .size(128.dp)
+                            .size(360.dp)
                             .padding(16.dp)
                     )
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = text,
                         style = TextStyle(

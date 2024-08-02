@@ -5,7 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ocacapp.Model.WalkthroughModel
+import com.example.ocacapp.Model.LanguageModel
 import com.example.ocacapp.services.APIService
 import com.example.ocacapp.services.baseUrl
 import kotlinx.coroutines.launch
@@ -15,10 +15,9 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class WalkthroughViewModel : ViewModel() {
-    //    private val repository = DataRepository()
-    private val _data = mutableStateOf<WalkthroughModel?>(null)
-    val data: State<WalkthroughModel?> get() = _data
+class LanguageViewModel : ViewModel() {
+    private val _data = mutableStateOf<LanguageModel?>(null)
+    val data: State<LanguageModel?> get() = _data
 
     init {
         viewModelScope.launch {
@@ -29,12 +28,12 @@ class WalkthroughViewModel : ViewModel() {
 
             val api = retrofit.create(APIService::class.java)
 
-            val call: Call<WalkthroughModel?>? = api.getIntroList();
+            val call: Call<LanguageModel?>? = api.getLanguageList();
 
-            call!!.enqueue(object : Callback<WalkthroughModel?> {
+            call!!.enqueue(object : Callback<LanguageModel?> {
                 override fun onResponse(
-                    call: Call<WalkthroughModel?>,
-                    response: Response<WalkthroughModel?>
+                    call: Call<LanguageModel?>,
+                    response: Response<LanguageModel?>
                 ) {
                     if (response.isSuccessful) {
                         Log.d("Main", "success!" + response.body().toString())
@@ -42,11 +41,10 @@ class WalkthroughViewModel : ViewModel() {
                     }
                 }
 
-                override fun onFailure(call: Call<WalkthroughModel?>, t: Throwable) {
+                override fun onFailure(call: Call<LanguageModel?>, t: Throwable) {
                     Log.e("Main", "Failed mate " + t.message.toString())
                 }
             })
         }
     }
 }
-
