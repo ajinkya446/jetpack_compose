@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "545185044832",
+    "project_id": "ocac-jetpack",
+    "storage_bucket": "ocac-jetpack.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:545185044832:android:539169997f4cc632d62605",
+        "android_client_info": {
+          "package_name": "com.jetpack.ocac"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqHdu01-TZmqT4_WdzgflHqoLkHiEXzLI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

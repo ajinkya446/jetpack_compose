@@ -1,0 +1,48 @@
+package com.jetpack.ocac.services
+
+import com.jetpack.ocac.Model.LanguageModel
+import com.jetpack.ocac.Model.WalkthroughModel
+import com.jetpack.ocacapp.Model.Params
+import com.jetpack.ocacapp.Model.ValidateAadhaar
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.HTTP
+import retrofit2.http.Headers
+import retrofit2.http.POST
+
+var baseUrl: String = "https://fup.famrut.com/documentation/";
+
+interface APIService {
+    @Headers(
+        "app-type': android",
+        "api-key': j35k9g7s2h0d4l6a",
+        "Content-Type: application/json; charset=UTF-8",
+        "client-id: 4b2j35-k9g76s-2h0d4l-6ab5yt",
+        "client-secret: nuC+hgapd93HTqw++C45ghjyeYF78sdPO="
+    )
+    @GET("intro_screen_list/?limit=3")
+    fun getIntroList(): Call<WalkthroughModel?>?
+
+    @Headers(
+        "app-type': android",
+        "api-key': j35k9g7s2h0d4l6a",
+        "Content-Type: application/json; charset=UTF-8",
+        "client-id: 4b2j35-k9g76s-2h0d4l-6ab5yt",
+        "client-secret: nuC+hgapd93HTqw++C45ghjyeYF78sdPO="
+    )
+    @GET("languages/")
+    fun getLanguageList(): Call<LanguageModel?>?
+
+    @Headers(
+        "Content-Type: application/json; charset=UTF-8",
+        "accept: application/json",
+        "client-id: 4b2j35-k9g76s-2h0d4l-6ab5yt",
+        "client-secret: nuC+hgapd93HTqw++C45ghjyeYF78sdPO="
+    )
+//    @HTTP(method = "POST", path = "validate_aadhar_no/", hasBody = true)
+    @POST("validate_aadhar_no/")
+    fun validateAadhaar(@Body jsonBody: RequestBody): Call<ValidateAadhaar?>
+}

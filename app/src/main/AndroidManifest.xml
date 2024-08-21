@@ -37,7 +37,7 @@
             android:name=".DashboardScreen"
             android:exported="false"
             android:label="@string/title_activity_dashboard_screen"
-            android:theme="@style/Theme.OCACApp"></activity>
+            android:theme="@style/Theme.OCACApp" />
         <activity
             android:name=".OTPScreen"
             android:exported="false"
@@ -47,7 +47,7 @@
             android:name=".LoginScreenActivity"
             android:exported="false"
             android:label="@string/title_activity_login_screen"
-            android:theme="@style/Theme.OCACApp"></activity>
+            android:theme="@style/Theme.OCACApp" />
         <activity
             android:name=".WalkthroughScreen"
             android:exported="false"
