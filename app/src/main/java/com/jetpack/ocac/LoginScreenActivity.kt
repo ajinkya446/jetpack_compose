@@ -1,4 +1,4 @@
-package com.jetpack.ocacapp
+package com.jetpack.ocac
 
 import android.content.Intent
 import android.net.Uri
@@ -55,13 +55,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jetpack.ocac.OTPScreen
-import com.jetpack.ocac.R
 import com.jetpack.ocac.services.APIService
 import com.jetpack.ocac.services.baseUrl
 import com.jetpack.ocac.ui.theme.OCACAppTheme
-import com.jetpack.ocacapp.Model.AadhaarValidate
-import com.jetpack.ocacapp.Model.ValidateAadhaar
+import com.jetpack.ocac.Model.AadhaarValidate
+import com.jetpack.ocac.Model.ValidateAadhaar
+import com.jetpack.ocacapp.R
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody

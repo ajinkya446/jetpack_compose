@@ -1,4 +1,4 @@
-package com.jetpack.ocacapp.Model
+package com.jetpack.ocac.Model
 
 data class ValidateAadhaar(
     val error: Int,

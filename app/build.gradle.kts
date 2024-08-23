@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.jetpack.ocac"
+    namespace = "com.jetpack.ocacapp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.jetpack.ocac"
+        applicationId = "com.jetpack.ocacapp"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -88,4 +88,6 @@ dependencies {
     implementation ("io.coil-kt:coil-compose:2.1.0")
     implementation("com.google.firebase:firebase-analytics")
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation ("com.auth0.android:jwtdecode:2.0.0")
+
 }

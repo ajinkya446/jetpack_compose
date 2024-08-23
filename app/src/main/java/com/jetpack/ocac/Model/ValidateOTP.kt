@@ -1,4 +1,4 @@
-package com.jetpack.ocacapp.Model
+package com.jetpack.ocac.Model
 
 data class ValidateOTP(
     val access_token: String,
@@ -7,4 +7,10 @@ data class ValidateOTP(
     val notification_response: NotificationResponse,
     val success: Int,
     val token_type: String
+)
+
+data class NotificationResponse(
+    val message: String,
+    val response: Response,
+    val success: Int
 )

@@ -49,7 +49,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.jetpack.ocac.ViewModels.WalkthroughViewModel
 import com.jetpack.ocac.ui.theme.OCACAppTheme
-import com.jetpack.ocacapp.LoginScreenActivity
+import com.jetpack.ocacapp.R
 
 class WalkthroughScreen : ComponentActivity() {
 

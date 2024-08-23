@@ -69,7 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import com.jetpack.ocac.ui.theme.OCACAppTheme
-import com.jetpack.ocacapp.LoginScreenActivity
+import com.jetpack.ocacapp.R
 import kotlinx.coroutines.launch
 
 class DashboardScreen : ComponentActivity() {
@@ -322,7 +322,8 @@ fun DashboardScreenUI() {
                     contentDescription = "helpline",
                     modifier = Modifier
                         .height(58.dp)
-                        .width(58.dp).clickable {
+                        .width(58.dp)
+                        .clickable {
                             val intent = Intent(Intent.ACTION_DIAL).apply {
                                 data = Uri.parse("tel:155233")
                             }
@@ -745,6 +746,7 @@ fun DashboardScreenUI() {
         }
     }
 }
+
 
 @Composable
 fun DrawerContentUI() {

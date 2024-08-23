@@ -1,4 +1,4 @@
-package com.jetpack.ocacapp.Model
+package com.jetpack.ocac.Model
 
 data class Response(
     val canonical_ids: Int,

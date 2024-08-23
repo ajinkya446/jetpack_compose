@@ -62,10 +62,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jetpack.ocac.Model.ValidateOTP
 import com.jetpack.ocac.services.APIService
+import com.jetpack.ocac.services.access_token
 import com.jetpack.ocac.services.baseUrl
 import com.jetpack.ocac.ui.theme.OCACAppTheme
-import com.jetpack.ocacapp.Model.ValidateOTP
+import com.jetpack.ocacapp.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -238,10 +240,19 @@ class OTPScreen : ComponentActivity() {
                                                     if (response.isSuccessful) {
                                                         data.value = response.body()!!
                                                         loading = false
-
-                                                        val sharedPref = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
+                                                        access_token =
+                                                            data.value?.access_token ?: ""
+                                                        val sharedPref =
+                                                            context.getSharedPreferences(
+                                                                "my_prefs",
+                                                                Context.MODE_PRIVATE
+                                                            )
                                                         val editor = sharedPref.edit()
                                                         editor.putBoolean("login", true)
+                                                        editor.putString(
+                                                            "access-token",
+                                                            data.value?.access_token ?: ""
+                                                        )
                                                         editor.apply()
                                                         context.startActivity(
                                                             Intent(
@@ -389,7 +400,6 @@ class TimerViewModel : ViewModel() {
         startTimer()
     }
 }
-
 
 @Composable
 fun CountdownTimerApp(timerViewModel: TimerViewModel) {
