@@ -1,10 +1,8 @@
-package com.jetpack.ocac
+package com.jetpack.ocacapp
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -57,9 +55,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jetpack.ocac.OTPScreen
+import com.jetpack.ocac.R
 import com.jetpack.ocac.services.APIService
 import com.jetpack.ocac.services.baseUrl
 import com.jetpack.ocac.ui.theme.OCACAppTheme
+import com.jetpack.ocacapp.Model.AadhaarValidate
 import com.jetpack.ocacapp.Model.ValidateAadhaar
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -72,8 +73,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class LoginScreenActivity : ComponentActivity() {
-    @SuppressLint("RememberReturnType")
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -83,6 +82,7 @@ class LoginScreenActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
+                    var textState by remember { mutableStateOf("") }
                     Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
                         Box(
                             modifier = Modifier
@@ -96,7 +96,20 @@ class LoginScreenActivity : ComponentActivity() {
                                 .padding(paddingValues = innerPadding),
                             contentAlignment = Alignment.Center
                         ) {
-                            LoginDesignUI(snackbarHostState)
+
+                            // Define what happens when the text changes
+                            val onTextChanged: (String) -> Unit = { newText ->
+                                textState = newText
+                                // Handle the new text
+                            }
+
+                            LoginDesignUI(
+                                snackbarHostState,
+                                label = textState,
+                                onTextChanged = onTextChanged,
+                            )
+
+
                         }
                     }
                 }
@@ -108,15 +121,28 @@ class LoginScreenActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun LoginDesignUI(
-        snackbarHostState: SnackbarHostState
+        snackbarHostState: SnackbarHostState,
+        label: String,
+        onTextChanged: (String) -> Unit
     ) {
+        var loading by remember { mutableStateOf(false) }
+
         val context = LocalContext.current
         val data = remember { mutableStateOf<ValidateAadhaar?>(null) }
+        val otpDetails = remember { mutableStateOf<AadhaarValidate?>(null) }
         val coroutineScope = rememberCoroutineScope()
-        var textState by remember { mutableStateOf("") }
-        var isLoading by remember { mutableStateOf(false) }
-//
-        if (!isLoading) {
+        if (loading) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator(
+                    color = Color(0xff11842E), strokeWidth = 3.2.dp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text("Loading")
+            }
+        } else {
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -175,8 +201,7 @@ class LoginScreenActivity : ComponentActivity() {
                         focusedBorderColor = Color(0xff11842E),
                         unfocusedBorderColor = Color(0xff11842E)
                     ),
-                    value = textState,
-//                                    modifier = inputModifier,
+                    value = label,
                     textStyle = TextStyle(
                         fontSize = 14.sp,
                         color = Color.Black,
@@ -185,7 +210,7 @@ class LoginScreenActivity : ComponentActivity() {
                     ),
                     onValueChange = {
                         if (it.length <= 12) {
-                            textState = it
+                            onTextChanged(it)
                         }
                     },
                     placeholder = {
@@ -201,97 +226,85 @@ class LoginScreenActivity : ComponentActivity() {
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(17.dp))
-                Box(modifier = Modifier
-                    .clickable {
-
-                        val isStatus: Boolean = validateAadhaarNumber(textState)
-                        if (isStatus) {
-                            coroutineScope.launch {
-                                snackbarHostState.showSnackbar("Invalid Aadhaar number. It must be exactly 12 digits.")
-                            }
-                        } else {
-
-                            try {
-                                // Create your JSON object
-                                val json = JSONObject()
-                                json.put("aadhar_number", textState)
+                Box(
+                    modifier = Modifier
+                        .clickable {
+                            val isStatus: Boolean = validateAadhaarNumber(label)
+                            if (isStatus) {
                                 coroutineScope.launch {
-                                    isLoading = true
-//                                    loginViewModel.validateAadhaar(textState)
-//                                    val data by loginViewModel.data
-                                    val retrofit = Retrofit
-                                        .Builder()
-                                        .baseUrl(baseUrl)
-                                        .addConverterFactory(GsonConverterFactory.create())
-                                        .build()
-                                    // Create a request body with the JSON object
-                                    val body = RequestBody.create(
-                                        "application/json".toMediaTypeOrNull(),
-                                        json.toString()
-                                    )
-
-                                    val api = retrofit.create(APIService::class.java)
-                                    val call: Call<ValidateAadhaar?> =
-                                        api.validateAadhaar(body)
-
-                                    call.enqueue(object : Callback<ValidateAadhaar?> {
-                                        override fun onResponse(
-                                            call: Call<ValidateAadhaar?>,
-                                            response: Response<ValidateAadhaar?>
-                                        ) {
-                                            if (response.isSuccessful) {
-                                                data.value = response.body()!!
-                                                isLoading = false
-                                                context.startActivity(
-                                                    Intent(
-                                                        context, OTPScreen::class.java
-                                                    )
-                                                )
-                                                data.value = null
-                                            } else if (response.code() == 400) {
-                                                coroutineScope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        "Aadhaar number not registered on KO."
-                                                    )
-                                                    isLoading = false
-                                                }
-                                            }
-                                        }
-
-                                        override fun onFailure(
-                                            call: Call<ValidateAadhaar?>,
-                                            t: Throwable
-                                        ) {
-                                            Log.e("Main", "Failed mate " + t.message.toString())
-                                            Log.e(
-                                                "Failed",
-                                                "Failed mate " + call.request().body!!
+                                    snackbarHostState.showSnackbar("Invalid Aadhaar number. It must be exactly 12 digits.")
+                                }
+                            } else {
+                                val json = JSONObject()
+                                json.put("aadhaar_no", label)
+                                loading = true
+                                val retrofit = Retrofit
+                                    .Builder()
+                                    .baseUrl(baseUrl)
+                                    .addConverterFactory(GsonConverterFactory.create())
+                                    .build()
+                                val body = RequestBody.create(
+                                    "application/json".toMediaTypeOrNull(),
+                                    json.toString()
+                                )
+                                val api = retrofit.create(APIService::class.java)
+                                val sendCall: Call<AadhaarValidate?> =
+                                    api.sendOTP(body)
+                                sendCall.enqueue(object : Callback<AadhaarValidate?> {
+                                    override fun onResponse(
+                                        callOTP: Call<AadhaarValidate?>,
+                                        responseOTP: Response<AadhaarValidate?>
+                                    ) {
+                                        if (responseOTP.isSuccessful) {
+                                            otpDetails.value = responseOTP.body()!!
+                                            loading = false
+                                            val intent = Intent(
+                                                context, OTPScreen::class.java
                                             )
+                                            intent.putExtra(
+                                                "transaction_id",
+                                                otpDetails.value!!.transaction_id
+                                            )
+                                            intent.putExtra(
+                                                "mobile_number",
+                                                otpDetails.value!!.mobile_number
+                                            )
+                                            context.startActivity(intent)
+                                            otpDetails.value = null
+                                        } else if (responseOTP.code() == 400) {
+                                            loading = false
                                             coroutineScope.launch {
                                                 snackbarHostState.showSnackbar(
-                                                    "Something Went wrong..."
+                                                    "Could not able to send otp to aadhaar number."
                                                 )
-                                                isLoading = false
                                             }
+                                        } else {
+                                            loading = false
                                         }
-                                    })
-                                    println("data:$data")
+                                    }
 
-                                }
-
-                            } catch (e: Exception) {
-                                isLoading = false
-                                throw e
+                                    override fun onFailure(
+                                        callOTP: Call<AadhaarValidate?>,
+                                        t: Throwable
+                                    ) {
+                                        loading = false
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                "Could not able to send otp to aadhaar number."
+                                            )
+                                        }
+                                    }
+                                })
+                                data.value = null
                             }
                         }
-                    }
-                    .fillMaxWidth()
-                    .height(58.dp)
-                    .padding(horizontal = 16.dp)
-                    .background(
-                        color = Color(0xff11842E), shape = RoundedCornerShape(20)
-                    )
-                    .size(15.dp), contentAlignment = Alignment.Center) {
+                        .fillMaxWidth()
+                        .height(58.dp)
+                        .padding(horizontal = 16.dp)
+                        .background(
+                            color = Color(0xff11842E), shape = RoundedCornerShape(20)
+                        )
+                        .size(15.dp), contentAlignment = Alignment.Center) {
                     Text(
                         text = "Validate Aadhaar", style = TextStyle(
                             fontSize = 16.sp,
@@ -366,17 +379,8 @@ class LoginScreenActivity : ComponentActivity() {
 
                 }
             }
-        } else {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator(
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text("Loading")
-            }
         }
+
     }
 
     /// Checking aadhaar number
@@ -385,4 +389,5 @@ class LoginScreenActivity : ComponentActivity() {
         return !aadhaarRegex.matches(aadhaar)
     }
 }
+
 

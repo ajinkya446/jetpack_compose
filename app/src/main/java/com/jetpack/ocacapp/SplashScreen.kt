@@ -23,7 +23,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jetpack.ocac.ui.theme.OCACAppTheme
+import com.jetpack.ocacapp.LoginScreenActivity
 import kotlinx.coroutines.delay
+
+var token = "";
 
 class SplashScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +35,7 @@ class SplashScreen : ComponentActivity() {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 // Get the token
-                val token = task.result
+                token = task.result
                 Log.d("FirebaseToken", "Token: $token")
                 // Do something with the token (e.g., send it to your server)
             } else {
@@ -50,7 +53,8 @@ class SplashScreen : ComponentActivity() {
                     val context = LocalContext.current
                     val sharedPref = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
                     val isBoarded = sharedPref.getBoolean("walkthrough", false)
-                    SplashScreenUI(isBoarded)
+                    val isLoggedIn = sharedPref.getBoolean("login", false)
+                    SplashScreenUI(isBoarded, isLoggedIn)
                 }
             }
         }
@@ -58,7 +62,7 @@ class SplashScreen : ComponentActivity() {
 }
 
 @Composable
-fun SplashScreenUI(isBoarded: Boolean) {
+fun SplashScreenUI(isBoarded: Boolean, isLoggedIn: Boolean) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         delay(3000) // 3 seconds delay
@@ -67,6 +71,13 @@ fun SplashScreenUI(isBoarded: Boolean) {
                 Intent(
                     context,
                     MainActivity::class.java
+                )
+            )
+        } else if (isLoggedIn) {
+            context.startActivity(
+                Intent(
+                    context,
+                    DashboardScreen::class.java
                 )
             )
         } else {

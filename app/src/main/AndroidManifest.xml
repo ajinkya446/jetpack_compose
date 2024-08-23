@@ -44,7 +44,7 @@
             android:label="@string/title_activity_otpscreen"
             android:theme="@style/Theme.OCACApp" />
         <activity
-            android:name=".LoginScreenActivity"
+            android:name="com.jetpack.ocacapp.LoginScreenActivity"
             android:exported="false"
             android:label="@string/title_activity_login_screen"
             android:theme="@style/Theme.OCACApp" />
