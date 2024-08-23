@@ -1,4 +1,4 @@
-package com.jetpack.ocac
+package com.jetpack.ocacapp
 
 import android.content.Context
 import android.content.Intent
@@ -62,8 +62,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jetpack.ocac.DashboardScreen
+import com.jetpack.ocac.R
 import com.jetpack.ocac.services.APIService
 import com.jetpack.ocac.services.baseUrl
+import com.jetpack.ocac.token
 import com.jetpack.ocac.ui.theme.OCACAppTheme
 import com.jetpack.ocacapp.Model.ValidateOTP
 import kotlinx.coroutines.delay
@@ -239,7 +242,11 @@ class OTPScreen : ComponentActivity() {
                                                         data.value = response.body()!!
                                                         loading = false
 
-                                                        val sharedPref = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
+                                                        val sharedPref =
+                                                            context.getSharedPreferences(
+                                                                "my_prefs",
+                                                                Context.MODE_PRIVATE
+                                                            )
                                                         val editor = sharedPref.edit()
                                                         editor.putBoolean("login", true)
                                                         editor.apply()

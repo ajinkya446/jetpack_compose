@@ -66,28 +66,12 @@ fun SplashScreenUI(isBoarded: Boolean, isLoggedIn: Boolean) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         delay(3000) // 3 seconds delay
-        if (!isBoarded) {
-            context.startActivity(
-                Intent(
-                    context,
-                    MainActivity::class.java
-                )
+        context.startActivity(
+            Intent(
+                context,
+                if (!isBoarded) MainActivity::class.java else if (isLoggedIn) DashboardScreen::class.java else LoginScreenActivity::class.java
             )
-        } else if (isLoggedIn) {
-            context.startActivity(
-                Intent(
-                    context,
-                    DashboardScreen::class.java
-                )
-            )
-        } else {
-            context.startActivity(
-                Intent(
-                    context,
-                    LoginScreenActivity::class.java
-                )
-            )
-        }
+        )
     }
     Column(
         verticalArrangement = Arrangement.Center,
