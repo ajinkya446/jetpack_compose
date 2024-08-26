@@ -14,3 +14,14 @@ data class NotificationResponse(
     val response: Response,
     val success: Int
 )
+data class Response(
+    val canonical_ids: Int,
+    val failure: Int,
+    val multicast_id: Long,
+    val results: List<Result>,
+    val success: Int
+)
+
+data class Result(
+    val error: String
+)

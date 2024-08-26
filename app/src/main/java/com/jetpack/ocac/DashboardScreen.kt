@@ -30,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -47,6 +48,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,13 +70,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
+import com.jetpack.ocac.Model.Profile.UserProfileModel
+import com.jetpack.ocac.services.APIService
+import com.jetpack.ocac.services.access_token
+import com.jetpack.ocac.services.baseUrl
 import com.jetpack.ocac.ui.theme.OCACAppTheme
 import com.jetpack.ocacapp.R
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class DashboardScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             OCACAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -82,17 +96,72 @@ class DashboardScreen : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    DashboardScreenUI()
+                    var loading by remember { mutableStateOf(false) }
+                    var userProfileDetails by remember { mutableStateOf<UserProfileModel?>(null) }
+                    LaunchedEffect(Unit) {
+                        loading = true
+                        val retrofit = Retrofit
+                            .Builder()
+                            .baseUrl(baseUrl).client(okHttpClient)
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .build()
+                        val api = retrofit.create(APIService::class.java)
+                        val call: Call<UserProfileModel?> = api.getFarmerDetails()
+                        call.enqueue(object : Callback<UserProfileModel?> {
+                            override fun onResponse(
+                                call: Call<UserProfileModel?>,
+                                response: Response<UserProfileModel?>
+                            ) {
+                                if (response.isSuccessful) {
+                                    userProfileDetails = response.body()!!
+                                }
+                                loading = false
+                            }
+
+                            override fun onFailure(
+                                call: Call<UserProfileModel?>, t: Throwable
+                            ) {
+                                loading = false
+                            }
+                        })
+                    }
+                    if (!loading) {
+                        DashboardScreenUI(userProfileDetails)
+                    } else {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator(
+                                color = Color(0xff11842E), strokeWidth = 3.2.dp
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text("Loading")
+                        }
+                    }
                 }
             }
         }
     }
 }
 
+// OkHttpClient with the interceptor
+private val okHttpClient = OkHttpClient.Builder()
+    .addInterceptor { chain ->
+        val originalRequest = chain.request()
+        val requestBuilder: Request.Builder = originalRequest.newBuilder()
+        if (!access_token.isNullOrBlank()) {
+            requestBuilder.addHeader("Authorization", "Bearer $access_token")
+        }
+        val request = requestBuilder.build()
+        chain.proceed(request)
+    }
+    .build()
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreenUI() {
+fun DashboardScreenUI(userDetails: UserProfileModel?) {
 
     val items = listOf(
         GridMenu(
@@ -127,7 +196,7 @@ fun DashboardScreenUI() {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            DrawerContentUI()
+            DrawerContentUI(userDetails)
         },
     ) {
 
@@ -151,15 +220,17 @@ fun DashboardScreenUI() {
                     }
                 },
                 title = {
-                    Text(
-                        text = "Hello, Ajinkya ",
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            color = Color.White,
-                            fontFamily = FontFamily(Font(R.font.lato_regular)),
-                            fontWeight = FontWeight.Normal
+                    if (userDetails != null) {
+                        Text(
+                            text = userDetails.data.demoInfo.vchFarmerName,
+                            style = TextStyle(
+                                fontSize = 20.sp,
+                                color = Color.White,
+                                fontFamily = FontFamily(Font(R.font.lato_regular)),
+                                fontWeight = FontWeight.Normal
+                            )
                         )
-                    )
+                    }
                 },
                 actions = {
                     Box(modifier = Modifier
@@ -749,13 +820,13 @@ fun DashboardScreenUI() {
 
 
 @Composable
-fun DrawerContentUI() {
+fun DrawerContentUI(userProfileModel: UserProfileModel?) {
     ModalDrawerSheet(
         modifier = Modifier.width(260.dp),
         drawerContainerColor = Color.White
     ) {
         val context = LocalContext.current
-        DrawerHeader()
+        DrawerHeader(userProfileModel)
         DrawerBody(itemTextStyle = TextStyle(
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,

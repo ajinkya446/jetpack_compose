@@ -181,23 +181,11 @@ fun SplashScreenUI(isBoarded: Boolean, isLoggedIn: Boolean, accessToken: String)
 private val okHttpClient = OkHttpClient.Builder()
     .addInterceptor { chain ->
         val originalRequest = chain.request()
-
         val requestBuilder: Request.Builder = originalRequest.newBuilder()
-
         if (!access_token.isNullOrBlank()) {
             requestBuilder.addHeader("Authorization", "Bearer $access_token")
         }
-
-        val headers = originalRequest.headers
-        for (name in headers.names()) {
-            Log.d("HeaderLogging", "$name: ${headers[name]}")
-        }
-
         val request = requestBuilder.build()
-        val headerss = request.headers
-        for (name in headerss.names()) {
-            Log.d("HeaderLogging", "$name: ${headerss[name]}")
-        }
         chain.proceed(request)
     }
     .build()
