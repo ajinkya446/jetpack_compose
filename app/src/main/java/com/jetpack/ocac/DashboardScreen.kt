@@ -4,9 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -70,6 +73,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
 import com.jetpack.ocac.Model.Profile.UserProfileModel
 import com.jetpack.ocac.services.APIService
 import com.jetpack.ocac.services.access_token
@@ -91,6 +96,21 @@ class DashboardScreen : ComponentActivity() {
 
         setContent {
             OCACAppTheme {
+                val context = LocalContext.current
+                var hasPermission by remember { mutableStateOf(false) }
+                val locationPermissionLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission()
+                ) { isGranted: Boolean ->
+                    hasPermission = isGranted
+//        shouldShowRationale = !isGranted && !shouldShowRationale
+                }
+                LaunchedEffect(Unit) {
+                    locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    val permissionStatus = ContextCompat.checkSelfPermission(
+                        context, android.Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                    hasPermission = permissionStatus == PermissionChecker.PERMISSION_GRANTED
+                }
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -99,6 +119,7 @@ class DashboardScreen : ComponentActivity() {
                     var loading by remember { mutableStateOf(false) }
                     var userProfileDetails by remember { mutableStateOf<UserProfileModel?>(null) }
                     LaunchedEffect(Unit) {
+
                         loading = true
                         val retrofit = Retrofit
                             .Builder()
@@ -126,7 +147,8 @@ class DashboardScreen : ComponentActivity() {
                         })
                     }
                     if (!loading) {
-                        DashboardScreenUI(userProfileDetails)
+//                        PermissionScreen()
+                        DashboardScreenUI(userProfileDetails, hasPermission)
                     } else {
                         Column(
                             verticalArrangement = Arrangement.Center,
@@ -161,7 +183,7 @@ private val okHttpClient = OkHttpClient.Builder()
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreenUI(userDetails: UserProfileModel?) {
+fun DashboardScreenUI(userDetails: UserProfileModel?, locationEnabled: Boolean) {
 
     val items = listOf(
         GridMenu(
@@ -259,7 +281,7 @@ fun DashboardScreenUI(userDetails: UserProfileModel?) {
                                         },
                                         text = {
                                             Text(
-                                                text = "$langItem", style = TextStyle(
+                                                text = langItem, style = TextStyle(
                                                     fontSize = 16.sp,
                                                     color = Color.Black,
                                                     fontFamily = FontFamily(Font(R.font.lato_regular)),
@@ -424,6 +446,7 @@ fun DashboardScreenUI(userDetails: UserProfileModel?) {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Box(
+                    contentAlignment = if (!locationEnabled) Alignment.Center else Alignment.TopStart,
                     modifier = Modifier
                         .height(80.dp)
                         .fillMaxWidth()
@@ -433,52 +456,90 @@ fun DashboardScreenUI(userDetails: UserProfileModel?) {
                             contentScale = ContentScale.FillWidth
                         )
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 24.dp, vertical = 9.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
-                            Text(
-                                text = "19°C", style = TextStyle(
-                                    fontSize = 32.sp,
-                                    color = Color.Black,
-                                    fontFamily = FontFamily(Font(R.font.lato_regular)),
-                                    fontWeight = FontWeight.Medium
+                    if (locationEnabled) {
+                        Row(
+                            modifier = Modifier
+                                .padding(horizontal = 24.dp, vertical = 9.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(
+                                    text = "19°C", style = TextStyle(
+                                        fontSize = 32.sp,
+                                        color = Color.Black,
+                                        fontFamily = FontFamily(Font(R.font.lato_regular)),
+                                        fontWeight = FontWeight.Medium
+                                    )
                                 )
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Nashik, Maharashtra", style = TextStyle(
-                                    fontSize = 14.sp,
-                                    color = Color(0xff3F3F3F),
-                                    fontFamily = FontFamily(Font(R.font.lato_regular)),
-                                    fontWeight = FontWeight.Medium
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Nashik, Maharashtra", style = TextStyle(
+                                        fontSize = 14.sp,
+                                        color = Color(0xff3F3F3F),
+                                        fontFamily = FontFamily(Font(R.font.lato_regular)),
+                                        fontWeight = FontWeight.Medium
+                                    )
                                 )
-                            )
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    modifier = Modifier
+                                        .width(58.dp)
+                                        .height(45.dp),
+                                    painter = painterResource(R.drawable.weather_sun),
+                                    contentDescription = null,
+                                )
+                                //                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Partly Cloudy", style = TextStyle(
+                                        fontSize = 14.sp,
+                                        color = Color(0xff111111),
+                                        fontFamily = FontFamily(Font(R.font.lato_regular)),
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                )
+                            }
                         }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                modifier = Modifier
-                                    .width(58.dp)
-                                    .height(45.dp),
-                                painter = painterResource(R.drawable.weather_sun),
-                                contentDescription = null,
-                            )
-                            //                Spacer(modifier = Modifier.height(4.dp))
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .padding(horizontal = 24.dp, vertical = 9.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
                             Text(
-                                text = "Partly Cloudy", style = TextStyle(
-                                    fontSize = 14.sp,
-                                    color = Color(0xff111111),
+                                text = "Enable location permission to use",
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    color = Color.Black,
                                     fontFamily = FontFamily(Font(R.font.lato_regular)),
                                     fontWeight = FontWeight.SemiBold
                                 )
                             )
+                            Icon(
+                                modifier = Modifier
+                                    .width(32.dp)
+                                    .height(32.dp)
+                                    .clickable {
+                                        val intent =
+                                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                                data = Uri.fromParts(
+                                                    "package",
+                                                    context.packageName,
+                                                    null
+                                                )
+                                            }
+                                        context.startActivity(intent)
+                                    },
+                                painter = painterResource(id = R.drawable.settings),
+                                contentDescription = null, tint = Color(0xff111111),
+                            )
                         }
                     }
+
                 }
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -500,7 +561,6 @@ fun DashboardScreenUI(userDetails: UserProfileModel?) {
                         )
                     )
                 }
-                Spacer(modifier = Modifier.height(12.dp))
                 Spacer(modifier = Modifier.height(12.dp))
                 Box(
                     modifier = Modifier
