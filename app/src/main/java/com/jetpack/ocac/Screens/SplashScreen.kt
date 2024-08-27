@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,15 +34,18 @@ import com.jetpack.ocacapp.R
 import kotlinx.coroutines.delay
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.nio.charset.StandardCharsets
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
 var token = "";
+var jsonObject: JSONObject? = null
 
 @SuppressLint("CustomSplashScreen")
 class SplashScreen : ComponentActivity() {
@@ -103,6 +107,7 @@ fun SplashScreenUI(isBoarded: Boolean, isLoggedIn: Boolean, accessToken: String)
         delay(3000) // 3 se
         if (accessToken != null && accessToken != "") {
             access_token = accessToken
+            decodeJWT(access_token)
             val timeUntilExpiration = getExpirationTime(accessToken)
             if (timeUntilExpiration > 0) {
                 context.startActivity(
@@ -188,3 +193,28 @@ private val okHttpClient = OkHttpClient.Builder()
     }
     .build()
 
+fun decodeJWT(token: String): Map<String, Any>? {
+    return try {
+        val parts = token.split(".")
+        if (parts.size != 3) {
+            throw IllegalArgumentException("Invalid JWT token")
+        }
+
+        val payload = parts[1]
+        val decodedBytes = Base64.decode(payload, Base64.URL_SAFE)
+        val decodedString = String(decodedBytes, StandardCharsets.UTF_8)
+
+        jsonObject = JSONObject(decodedString)
+        jsonObject!!.toMap()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+fun JSONObject.toMap(): Map<String, Any> = keys().asSequence().associateWith { key ->
+    when (val value = this[key]) {
+        is JSONObject -> value.toMap()
+        else -> value
+    }
+}

@@ -3,6 +3,7 @@ package com.jetpack.ocac.Screens
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -10,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -80,15 +82,20 @@ import com.jetpack.ocac.DrawerBody
 import com.jetpack.ocac.DrawerHeader
 import com.jetpack.ocac.GridMenu
 import com.jetpack.ocac.MenuItem
+import com.jetpack.ocac.Model.AKAI.AKAIModel
 import com.jetpack.ocac.Model.Profile.UserProfileModel
 import com.jetpack.ocac.services.APIService
 import com.jetpack.ocac.services.access_token
+import com.jetpack.ocac.services.akkaiBaseUrl
 import com.jetpack.ocac.services.baseUrl
 import com.jetpack.ocac.ui.theme.OCACAppTheme
 import com.jetpack.ocacapp.R
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -122,6 +129,7 @@ class DashboardScreen : ComponentActivity() {
                 ) {
                     var loading by remember { mutableStateOf(false) }
                     var userProfileDetails by remember { mutableStateOf<UserProfileModel?>(null) }
+                    var akaiResponse by remember { mutableStateOf<AKAIModel?>(null) }
                     LaunchedEffect(Unit) {
 
                         loading = true
@@ -149,10 +157,49 @@ class DashboardScreen : ComponentActivity() {
                                 loading = false
                             }
                         })
+                        loading = true
+                        val retrofitChat = Retrofit
+                            .Builder()
+                            .baseUrl("https://bff.prod.bhasai.samagra.io").client(okHttpClient)
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .build()
+                        val chatAPI = retrofitChat.create(APIService::class.java)
+                        val json = JSONObject()
+                        json.put("userServiceURL", "https://user.akai-prod.k8s.bhasai.samagra.io")
+                        json.put(
+                            "loginId",
+                            (jsonObject?.get("vault_reference_id") ?: "").toString()
+                        )
+                        json.put("applicationId", "3b688397-88dc-4de0-9869-897c98e0bf2d")
+
+                        val body = RequestBody.create(
+                            "application/json".toMediaTypeOrNull(),
+                            json.toString()
+                        )
+                        val callChatbot: Call<AKAIModel?> = chatAPI.getAkaiToken(body)
+                        callChatbot.enqueue(object : Callback<AKAIModel?> {
+                            override fun onResponse(
+                                call: Call<AKAIModel?>,
+                                response: Response<AKAIModel?>
+                            ) {
+                                if (response.isSuccessful) {
+                                    akaiResponse = response.body()!!
+                                    println("AKAI Response: $akaiResponse")
+                                    println("AKAI token: ${akaiResponse?.result?.data?.user?.token?:""}")
+                                }
+                                loading = false
+                            }
+
+                            override fun onFailure(
+                                call: Call<AKAIModel?>, t: Throwable
+                            ) {
+                                loading = false
+                            }
+                        })
                     }
                     if (!loading) {
 //                        PermissionScreen()
-                        DashboardScreenUI(userProfileDetails, hasPermission)
+                        DashboardScreenUI(userProfileDetails, hasPermission, akaiResponse)
                     } else {
                         Column(
                             verticalArrangement = Arrangement.Center,
@@ -184,10 +231,15 @@ private val okHttpClient = OkHttpClient.Builder()
     }
     .build()
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreenUI(userDetails: UserProfileModel?, locationEnabled: Boolean) {
+fun DashboardScreenUI(
+    userDetails: UserProfileModel?,
+    locationEnabled: Boolean,
+    akaiResponse: AKAIModel?
+) {
 
     val items = listOf(
         GridMenu(
@@ -705,6 +757,18 @@ fun DashboardScreenUI(userDetails: UserProfileModel?, locationEnabled: Boolean) 
                                             color = Color(0xffF5F6F6),
                                             shape = RoundedCornerShape(10)
                                         )
+                                        .clickable {
+                                            val intent = Intent(context, IFrameView::class.java)
+                                            intent.putExtra(
+                                                "url",
+                                                "${akkaiBaseUrl}chat' '?userId=${
+                                                    jsonObject
+                                                        ?.get("vault_reference_id")
+                                                        .toString()
+                                                }&navbar=show&lang=en&message=Guided:%20Weather&auth=${akaiResponse?.result?.data?.user?.token ?: ""}"
+                                            )
+                                            context.startActivity(intent)
+                                        }
                                         .padding(all = 10.dp)
                                 ) {
                                     Column(horizontalAlignment = Alignment.Start) {
@@ -958,6 +1022,7 @@ fun DashboardScreenUI(userDetails: UserProfileModel?, locationEnabled: Boolean) 
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DrawerContentUI(userProfileModel: UserProfileModel?) {
     ModalDrawerSheet(
