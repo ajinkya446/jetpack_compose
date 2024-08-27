@@ -1,0 +1,33 @@
+package com.jetpack.ocac.Model.Profile
+
+data class PlotRes(
+    val areaUnit: String,
+    val disrictCode: String,
+    val dtDateMutation: String,
+    val dtDateMutationView: String,
+    val floatLandholdingShare: Double,
+    val floatLandholdingSize: Double,
+    val intAccessToIrrigation: Int,
+    val intCroppingLandId: Int,
+    val intLandType: String,
+    val intLandTypeId: String,
+    val intRelation: String,
+    val kharip: List<Kharip>,
+    val kisamType: Any?,
+    val rabi: List<Rabi>,
+    val relationWithFarmerName: String,
+    val riCode: String,
+    val summer: List<Summer>,
+    val tahsilCode: String,
+    val tinLandLocation: String,
+    val tinLandLocationId: Int,
+    val vchDistrictName: String,
+    val vchIrrigationTypeName: String,
+    val vchKhataNo: String,
+    val vchPattaName: String,
+    val vchPlotNo: String,
+    val vchRevenueCircleName: String,
+    val vchTahsilName: String,
+    val vchVillageName: String,
+    val villageCode: String
+)
