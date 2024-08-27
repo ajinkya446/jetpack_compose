@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
+import com.google.gson.JsonObject
 import com.jetpack.ocac.Model.Profile.UserProfileModel
 import com.jetpack.ocac.services.APIService
 import com.jetpack.ocac.services.access_token
@@ -102,7 +103,6 @@ class DashboardScreen : ComponentActivity() {
                     contract = ActivityResultContracts.RequestPermission()
                 ) { isGranted: Boolean ->
                     hasPermission = isGranted
-//        shouldShowRationale = !isGranted && !shouldShowRationale
                 }
                 LaunchedEffect(Unit) {
                     locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -745,6 +745,44 @@ fun DashboardScreenUI(userDetails: UserProfileModel?, locationEnabled: Boolean) 
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(66.dp)
+                            .clickable {
+                                val retrofit = Retrofit
+                                    .Builder()
+                                    .baseUrl(baseUrl)
+                                    .client(okHttpClient)
+                                    .addConverterFactory(GsonConverterFactory.create())
+                                    .build()
+                                val api = retrofit.create(APIService::class.java)
+                                val call: Call<JsonObject> = api.getKrushakToken()
+                                call.enqueue(object : Callback<JsonObject> {
+                                    override fun onResponse(
+                                        call: Call<JsonObject>,
+                                        response: Response<JsonObject>
+                                    ) {
+                                        if (response.isSuccessful) {
+                                            println(response.body()!!)
+                                            if (response.body()!!["success"].toString() == "1") {
+                                                val intent = Intent(
+                                                    context,
+                                                    IFrameView::class.java
+                                                )
+                                                intent.putExtra(
+                                                    "url",
+                                                    response.body()!!["data"].toString()
+                                                )
+                                                context.startActivity(intent)
+                                            }
+
+                                        }
+                                    }
+
+                                    override fun onFailure(
+                                        call: Call<JsonObject>, t: Throwable
+                                    ) {
+                                        println(t)
+                                    }
+                                })
+                            }
                             .background(
                                 color = Color(0xffF5F6F6),
                                 shape = RoundedCornerShape(10)
@@ -833,6 +871,44 @@ fun DashboardScreenUI(userDetails: UserProfileModel?, locationEnabled: Boolean) 
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(66.dp)
+                            .clickable {
+                                val retrofit = Retrofit
+                                    .Builder()
+                                    .baseUrl(baseUrl)
+                                    .client(okHttpClient)
+                                    .addConverterFactory(GsonConverterFactory.create())
+                                    .build()
+                                val api = retrofit.create(APIService::class.java)
+                                val call: Call<JsonObject> = api.getSAFALToken()
+                                call.enqueue(object : Callback<JsonObject> {
+                                    override fun onResponse(
+                                        call: Call<JsonObject>,
+                                        response: Response<JsonObject>
+                                    ) {
+                                        if (response.isSuccessful) {
+                                            println(response.body()!!)
+                                            if (response.body()!!["success"].toString() == "1") {
+                                                val intent = Intent(
+                                                    context,
+                                                    IFrameView::class.java
+                                                )
+                                                intent.putExtra(
+                                                    "url",
+                                                    response.body()!!["data"].toString()
+                                                )
+                                                context.startActivity(intent)
+                                            }
+
+                                        }
+                                    }
+
+                                    override fun onFailure(
+                                        call: Call<JsonObject>, t: Throwable
+                                    ) {
+                                        println(t)
+                                    }
+                                })
+                            }
                             .background(
                                 color = Color(0xffF5F6F6),
                                 shape = RoundedCornerShape(10)
@@ -877,7 +953,6 @@ fun DashboardScreenUI(userDetails: UserProfileModel?, locationEnabled: Boolean) 
         }
     }
 }
-
 
 @Composable
 fun DrawerContentUI(userProfileModel: UserProfileModel?) {

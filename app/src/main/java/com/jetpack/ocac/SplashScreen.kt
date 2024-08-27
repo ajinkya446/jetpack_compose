@@ -148,8 +148,6 @@ fun SplashScreenUI(isBoarded: Boolean, isLoggedIn: Boolean, accessToken: String)
                         context.startActivity(Intent(context, LoginScreenActivity::class.java))
                     }
                 })
-
-
             }
 
         } else {
