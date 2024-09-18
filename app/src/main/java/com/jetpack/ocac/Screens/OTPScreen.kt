@@ -1,4 +1,4 @@
-package com.jetpack.ocac
+package com.jetpack.ocac.Screens
 
 import android.content.Context
 import android.content.Intent

@@ -26,12 +26,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name="com.jetpack.ocac.IFrameView"
+            android:name="com.jetpack.ocac.Screens.IFrameView"
             android:exported="false"
             android:label="@string/title_activity_iframe_view"
             android:theme="@style/Theme.OCACApp" />
         <activity
-            android:name="com.jetpack.ocac.SplashScreen"
+            android:name="com.jetpack.ocac.Screens.SplashScreen"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.OCACApp">
@@ -42,27 +42,27 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.jetpack.ocac.DashboardScreen"
+            android:name="com.jetpack.ocac.Screens.DashboardScreen"
             android:exported="false"
             android:label="@string/title_activity_dashboard_screen"
             android:theme="@style/Theme.OCACApp" />
         <activity
-            android:name="com.jetpack.ocac.OTPScreen"
+            android:name="com.jetpack.ocac.Screens.OTPScreen"
             android:exported="false"
             android:label="@string/title_activity_otpscreen"
             android:theme="@style/Theme.OCACApp" />
         <activity
-            android:name="com.jetpack.ocac.LoginScreenActivity"
+            android:name="com.jetpack.ocac.Screens.LoginScreenActivity"
             android:exported="false"
             android:label="@string/title_activity_login_screen"
             android:theme="@style/Theme.OCACApp" />
         <activity
-            android:name="com.jetpack.ocac.WalkthroughScreen"
+            android:name="com.jetpack.ocac.Screens.WalkthroughScreen"
             android:exported="false"
             android:label="@string/title_activity_walkthrough_screen"
             android:theme="@style/Theme.OCACApp" />
         <activity
-            android:name="com.jetpack.ocac.MainActivity"
+            android:name="com.jetpack.ocac.Screens.MainActivity"
             android:exported="false"
             android:theme="@style/Theme.OCACApp"></activity>
     </application>

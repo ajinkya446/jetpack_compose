@@ -1,6 +1,7 @@
 package com.jetpack.ocac.services
 
 import com.google.gson.JsonObject
+import com.jetpack.ocac.Model.AKAI.AKAIModel
 import com.jetpack.ocac.Model.AadhaarValidate
 import com.jetpack.ocac.Model.LanguageModel
 import com.jetpack.ocac.Model.Profile.UserProfileModel
@@ -14,7 +15,8 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
 
-var baseUrl: String = "https://fup.famrut.com/documentation/";
+var baseUrl: String = "https://fup.famrut.com/documentation/"
+var akkaiBaseUrl: String = "https://www.amakrushi.ai/"
 var access_token = ""
 
 interface APIService {
@@ -38,6 +40,17 @@ interface APIService {
     )
     @GET("ko_auto_login")
     fun getKrushakToken(): Call<JsonObject>
+
+    @Headers(
+        "app-type': android",
+        "api-key': j35k9g7s2h0d4l6a",
+        "Content-Type: application/json; charset=UTF-8",
+        "client-id: 4b2j35-k9g76s-2h0d4l-6ab5yt",
+        "client-secret: nuC+hgapd93HTqw++C45ghjyeYF78sdPO="
+    )
+    @POST("user/login-with-unique-id")
+    fun getAkaiToken(@Body jsonBody: RequestBody): Call<AKAIModel?>
+
     @Headers(
         "app-type': android",
         "api-key': j35k9g7s2h0d4l6a",

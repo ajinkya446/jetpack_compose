@@ -1,4 +1,4 @@
-package com.jetpack.ocac
+package com.jetpack.ocac.Screens
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -9,7 +9,9 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,6 +48,9 @@ fun WebViewScreen(url: String) {
         Text(text = "No Url Found")
     } else {
         AndroidView(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(),
             factory = { context ->
                 WebView(context).apply {
                     settings.javaScriptEnabled = true

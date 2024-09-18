@@ -1,5 +1,7 @@
 package com.jetpack.ocac.Model
 
+import com.jetpack.ocac.Model.AKAI.Result
+
 data class ValidateOTP(
     val access_token: String,
     val error: Int,

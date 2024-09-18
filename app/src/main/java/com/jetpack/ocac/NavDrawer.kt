@@ -1,5 +1,7 @@
 package com.jetpack.ocac
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,10 +36,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.jetpack.ocac.Model.Profile.UserProfileModel
+import com.jetpack.ocac.Screens.jsonObject
 import com.jetpack.ocacapp.R
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DrawerHeader(userProfileModel: UserProfileModel?) {
+    var joinedOn: String? = null
+    val date=jsonObject?.get("roll_on")
+    if ((jsonObject?.get("roll_on") ?: "").toString() != "") {
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")
+        val formattedDate = LocalDateTime.parse(date.toString(), dateFormatter)
+//        val localDateTime = LocalDateTime.parse((jsonObject?.get("roll_on") ?: "").toString(),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy")
+        joinedOn = formattedDate.format(formatter)
+    }
     Box(
         modifier = Modifier
             .width(400.dp)
@@ -72,7 +87,7 @@ fun DrawerHeader(userProfileModel: UserProfileModel?) {
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Joined February 2024", style = TextStyle(
+                    text = "Joined $joinedOn", style = TextStyle(
                         fontSize = 12.sp,
                         color = Color.White,
                         fontFamily = FontFamily(Font(R.font.lato_regular)),
